@@ -1,0 +1,94 @@
+--- build/src/tor-0.2.5.8-rc/src/or/main.c
++++ build/src/tor-0.2.5.8-rc/src/or/main.c
+@@ -3125,6 +3125,7 @@ tor_free_all(int postfork)
+ void
+ tor_cleanup(void)
+ {
++  printf("TOR cleanup starting...\n");
+   const or_options_t *options = get_options();
+   if (options->command == CMD_RUN_TOR) {
+     time_t now = time(NULL);
+@@ -3154,7 +3155,7 @@ tor_cleanup(void)
+ #ifdef USE_DMALLOC
+   dmalloc_log_stats();
+ #endif
+-  tor_free_all(0); /* We could move tor_free_all back into the ifdef below
++  tor_free_all(1); /* We could move tor_free_all back into the ifdef below
+                       later, if it makes shutdown unacceptably slow.  But for
+                       now, leave it here: it's helped us catch bugs in the
+                       past. */
+@@ -3163,6 +3164,7 @@ tor_cleanup(void)
+   dmalloc_log_unfreed();
+   dmalloc_shutdown();
+ #endif
++  printf("TOR cleanup done...\n");
+ }
+ 
+ /** Read/create keys as needed, and echo our fingerprint to stdout. */
+@@ -3485,6 +3487,63 @@ sandbox_init_filter(void)
+   return cfg;
+ }
+ 
++void
++tor_reload(void)
++{
++  printf("TOR RELOADING ITSELF NOW!\n");
++  const or_options_t *options = get_options();
++
++#ifdef USE_DMALLOC
++  dmalloc_log_stats();
++  dmalloc_log_changed(0, 1, 0, 0);
++#endif
++
++  if (accounting_is_enabled(options))
++    accounting_record_bandwidth_usage(time(NULL), get_or_state());
++
++  router_reset_warnings();
++  routerlist_reset_warnings();
++  if (options_init_from_torrc(0, NULL) < 0) {
++      return;
++  }
++  options = get_options();
++  if (authdir_mode_handles_descs(options, -1)) {
++    if (dirserv_load_fingerprint_file() < 0) {
++      log_info(LD_GENERAL, "Error reloading fingerprints. "
++               "Continuing with old list.");
++    }
++  }
++
++  circuit_mark_all_dirty_circs_as_unusable();
++  router_reset_status_download_failures();
++  router_reset_descriptor_download_failures();
++  if (!options->DisableNetwork)
++    update_networkstatus_downloads(time(NULL));
++
++  if (server_mode(options)) {
++    time_t now = approx_time();
++    if (load_ed_keys(options, now) < 0 ||
++         generate_ed_link_cert(options, now)) {
++      log_warn(LD_OR, "Problem reloading Ed25519 keys; still using old keys.");
++    }
++
++    cpuworkers_rotate_keyinfo();
++    dns_reset();
++  }
++}
++
++void *killer_thread(void *argument)
++{
++    printf("Killer thread starting...\n");
++    sleep(8);
++    printf("Restarting tor now...\n");
++    tor_reload();
++    // Schedule self-reload again
++    pthread_t kill_thread;
++    int result_code = pthread_create(&kill_thread, NULL, killer_thread, NULL);
++    return NULL;
++}
++
+ /** Main entry point for the Tor process.  Called from main(). */
+ /* This function is distinct from main() only so we can link main.c into
+  * the unittest binary without conflicting with the unittests' main. */
+--
+1.8.4
+

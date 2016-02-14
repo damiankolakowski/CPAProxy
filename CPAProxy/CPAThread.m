@@ -71,8 +71,15 @@ const char *kTorArgsValueLogLevel = "notice stderr";
         kTorArgsKeyLog, kTorArgsValueLogLevel, 
         NULL 
     };
-    
-    tor_main(13, argv);
+
+    static int tor_loaded = 0;
+    if (tor_loaded) {
+        NSLog(@"Reloading TOR!");
+        tor_reload();
+    } else {
+        tor_loaded = 1;
+        tor_main(13, argv);
+    }
 }
 
 @end

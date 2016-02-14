@@ -6,7 +6,6 @@
 # LIBRARIES: openssl libevent tor
 # USE_BUILD_LOG: true false
 
-
 set -e
 
 SDK=$1
@@ -42,7 +41,7 @@ fi
 export MIN_IOS_VERSION="8.0"
 export OPENSSL_VERSION="1.0.2f"
 export LIBEVENT_VERSION="2.0.22-stable"
-export TOR_VERSION="0.2.7.5"
+export TOR_VERSION="0.2.8.1-alpha"
 
 BUILT_ARCHS=()
 DEVELOPER=`xcode-select --print-path`
@@ -131,7 +130,7 @@ cd ../
 # Combine binaries of different architectures results
 BINS=(libcrypto.a libssl.a)
 BINS+=(libevent_core.a libevent_pthreads.a libevent_extra.a libevent_openssl.a libevent.a)
-BINS+=(libcurve25519_donna.a libor-crypto.a libtor.a libor-event.a libor.a libor-trunnel.a libed25519_donna.a libed25519_ref10.a)
+BINS+=(libcurve25519_donna.a libor-crypto.a libtor.a libor-event.a libor.a libor-trunnel.a libed25519_donna.a libed25519_ref10.a libkeccak-tiny.a)
 
 NUMBER_OF_BUILT_ARCHS=${#BUILT_ARCHS[@]}
 
