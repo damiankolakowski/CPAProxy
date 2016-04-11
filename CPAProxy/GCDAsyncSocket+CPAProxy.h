@@ -6,7 +6,7 @@
 //
 //
 
-@import CocoaAsyncSocket;
+#import "GCDAsyncSocket.h"
 
 @interface GCDAsyncSocket (CPAProxy)
 
