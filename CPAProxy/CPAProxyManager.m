@@ -19,7 +19,7 @@ NSString * const CPAProxyDidFinishSetupNotification = @"com.cpaproxy.setup.finis
 
 NSString * const CPAErrorDomain = @"CPAErrorDomain";
 
-static const NSTimeInterval CPAConnectToTorSocketDelay = 0.2; //Amount of time to wait before attempting to connect again
+static const NSTimeInterval CPAConnectToTorSocketDelay = 5; //Amount of time to wait before attempting to connect again
 static const NSTimeInterval CPATimeoutDelay = 60 * 3; // Sometimes Tor takes a long time to bootstrap
 static const NSUInteger CPAMaxNumberControlConnectionAttempts = 10; //Max number of retries before firing an error
 
@@ -164,13 +164,23 @@ typedef NS_ENUM(NSUInteger, CPAControlPortStatus) {
 
 - (void)connectSocket
 {
-    if (self.controlPortStatus != CPAControlPortStatusConnecting) {
-        return;
-    }
+    self.controlPortStatus = CPAControlPortStatusConnecting;
     [self.socketManager connectToHost:self.configuration.socksHost port:self.configuration.controlPort error:nil];
 }
 
-- (void) resetTimeoutTimer {
+- (void)reloadWithCompletion:(CPABootstrapCompletionBlock)completion
+                    progress:(CPABootstrapProgressBlock)progress
+{
+    [self.socketManager disconnect];
+    self.controlPortStatus = CPAControlPortStatusClosed;
+    self.status = CPAStatusClosed;
+    self.completionBlock = completion;
+    self.progressBlock = progress;
+    [self.torThread reload];
+    [self tryConnectingControlPortAfterDelay:CPAConnectToTorSocketDelay];
+}
+
+- (void)resetTimeoutTimer {
     dispatch_async(dispatch_get_main_queue(), ^{
         if (self.timeoutTimer) {
             [self.timeoutTimer invalidate];
@@ -221,17 +231,7 @@ typedef NS_ENUM(NSUInteger, CPAControlPortStatus) {
 - (void)socketManager:(CPASocketManager *)manager didDisconnectError:(NSError *)error
 {
     self.controlPortStatus = CPAControlPortStatusClosed;
-    self.controlPortConnectionAttempts += 1;
-    if(self.controlPortConnectionAttempts < CPAMaxNumberControlConnectionAttempts) {
-        self.controlPortStatus = CPAControlPortStatusConnecting;
-        [self tryConnectingControlPortAfterDelay:CPAConnectToTorSocketDelay];
-    } else {
-        NSDictionary *userInfo = @{ NSLocalizedFailureReasonErrorKey: @"Failed to connect to control port socket" };
-        NSError *err = [[NSError alloc] initWithDomain:CPAErrorDomain code:CPAErrorSocketOpenFailed userInfo:userInfo];
-        [self failWithError:err];
-    }
-    
-    
+    // Do not try reconnecting. We restart the whole thing anyways
 }
 
 #pragma mark - Handle Tor control responses

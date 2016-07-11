@@ -1,0 +1,113 @@
+From 97c17d27f0faee95ac3065026f05377a8eb7fe79 Mon Sep 17 00:00:00 2001
+From: John Beanie <j.beanie@ynd-consult.com>
+Date: Sun, 10 Jul 2016 15:19:25 +0200
+Subject: [PATCH 2/2] Adding tor_reload for restarting TOR.
+
+---
+ src/or/connection.c |  2 +-
+ src/or/main.c       | 62 ++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 62 insertions(+), 2 deletions(-)
+
+diff --git a/src/or/connection.c b/src/or/connection.c
+index 123c33a..cdf12ba 100644
+--- a/src/or/connection.c
++++ b/src/or/connection.c
+@@ -2373,7 +2373,7 @@ retry_listener_ports(smartlist_t *old_conns,
+       }
+     } SMARTLIST_FOREACH_END(wanted);
+ 
+-    if (found_port) {
++    if (found_port && ! control_listeners_only) {
+       /* This listener is already running; we don't need to launch it. */
+       //log_debug(LD_NET, "Already have %s on %s:%d",
+       //    conn_type_to_string(found_port->type), conn->address, conn->port);
+diff --git a/src/or/main.c b/src/or/main.c
+index bd4f7ea..0037e6b 100644
+--- a/src/or/main.c
++++ b/src/or/main.c
+@@ -1922,6 +1922,16 @@ retry_listeners_callback(time_t now, const or_options_t *options)
+ }
+ 
+ static int
++force_retry_listeners_callback(time_t now, const or_options_t *options)
++{
++  (void)now;
++  (void)options;
++  retry_all_listeners(NULL, NULL, 1);
++  retry_all_listeners(NULL, NULL, 0);
++  return PERIODIC_EVENT_NO_UPDATE;
++}
++
++static int
+ expire_old_ciruits_serverside_callback(time_t now, const or_options_t *options)
+ {
+   (void)options;
+@@ -3192,7 +3202,7 @@ tor_cleanup(void)
+ #ifdef USE_DMALLOC
+   dmalloc_log_stats();
+ #endif
+-  tor_free_all(0); /* We could move tor_free_all back into the ifdef below
++  tor_free_all(1); /* We could move tor_free_all back into the ifdef below
+                       later, if it makes shutdown unacceptably slow.  But for
+                       now, leave it here: it's helped us catch bugs in the
+                       past. */
+@@ -3523,6 +3533,56 @@ sandbox_init_filter(void)
+   return cfg;
+ }
+ 
++void
++tor_reload(void)
++{
++  log_info(LD_GENERAL, "Tor reloading itself now!");
++  const or_options_t *options = get_options();
++
++#ifdef USE_DMALLOC
++  dmalloc_log_stats();
++  dmalloc_log_changed(0, 1, 0, 0);
++#endif
++
++  if (accounting_is_enabled(options))
++    accounting_record_bandwidth_usage(time(NULL), get_or_state());
++
++  router_reset_warnings();
++  routerlist_reset_warnings();
++  if (options_init_from_torrc(0, NULL) < 0) {
++      return;
++  }
++  options = get_options();
++  if (authdir_mode_handles_descs(options, -1)) {
++    if (dirserv_load_fingerprint_file() < 0) {
++      log_info(LD_GENERAL, "Error reloading fingerprints. "
++               "Continuing with old list.");
++    }
++  }
++
++  circuit_mark_all_dirty_circs_as_unusable();
++  router_reset_status_download_failures();
++  router_reset_descriptor_download_failures();
++  if (!options->DisableNetwork)
++    update_networkstatus_downloads(time(NULL));
++
++  if (server_mode(options)) {
++    time_t now = approx_time();
++    if (load_ed_keys(options, now) < 0 ||
++         generate_ed_link_cert(options, now)) {
++      log_warn(LD_OR, "Problem reloading Ed25519 keys; still using old keys.");
++    }
++
++    cpuworkers_rotate_keyinfo();
++    dns_reset();
++  }
++
++  struct event *ev;
++  struct timeval one_second = { 1,0 };
++  ev = event_new(tor_libevent_get_base(), -1, EV_TIMEOUT, force_retry_listeners_callback, (char*)"Forced listeners retry");
++  event_add(ev, &one_second);
++}
++
+ /** Main entry point for the Tor process.  Called from main(). */
+ /* This function is distinct from main() only so we can link main.c into
+  * the unittest binary without conflicting with the unittests' main. */
+-- 
+2.7.1
+

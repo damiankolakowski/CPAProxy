@@ -23,6 +23,7 @@
  @return A newly initialized `CPAThread`.
  */
 - (instancetype)initWithConfiguration:(CPAConfiguration *)configuration;
+- (void)reload;
 
 /**
  Returns the `CPAConfiguration` with which the object has been initialized.

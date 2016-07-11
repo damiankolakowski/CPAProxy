@@ -137,8 +137,14 @@ const long CPASocketWriteTag = 110;
     });
 }
 
+- (void)disconnect
+{
+    [self.socket disconnect];
+}
+
 - (void)handleSocketDisconnectedWithError:(NSError *)error
 {
+    NSLog(@"CPA socket disconnected with error: %@", error);
     self.isConnected = NO;
     
     if ([self.delegate respondsToSelector:@selector(socketManager:didDisconnectError:)]) {
@@ -219,12 +225,14 @@ const long CPASocketWriteTag = 110;
 
 - (void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port
 {
+    NSLog(@"CPA socket connected.");
     [self handleSocketConnected];
     [self.socket readDataWithTimeout:CPASocketReadTimeout tag:CPASocketDidConnectReadTag];
 }
 
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
 {
+    NSLog(@"CPA socket disconnected.");
     [self handleSocketDisconnectedWithError:err];
 }
 

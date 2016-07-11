@@ -75,4 +75,9 @@ const char *kTorArgsValueLogLevel = "notice stderr";
     tor_main(13, argv);
 }
 
+- (void)reload
+{
+    tor_reload();
+}
+
 @end

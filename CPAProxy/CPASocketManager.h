@@ -72,6 +72,8 @@
  */
 - (void)sendCommand:(CPAProxyCommand *)command;
 
+- (void)disconnect;
+
 @end
 
 /**

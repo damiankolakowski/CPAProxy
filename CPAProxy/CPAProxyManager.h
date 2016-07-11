@@ -90,6 +90,9 @@ typedef NS_ENUM(NSUInteger, CPAStatus) {
 - (void)setupWithCompletion:(CPABootstrapCompletionBlock)completion
                    progress:(CPABootstrapProgressBlock)progress;
 
+- (void)reloadWithCompletion:(CPABootstrapCompletionBlock)completion
+                    progress:(CPABootstrapProgressBlock)progress;
+
 /**
  Starts running the `CPAThread` wrapping a Tor client, sends authentication and `get bootstrap info` messages to the control port and runs the success block with the SOCKS proxy's host and port on success. If anything goes wrong, the failure block is called with an NSError with `CPAErrorDomain`.
  
