@@ -72,7 +72,13 @@ const char *kTorArgsValueLogLevel = "notice stderr";
         NULL 
     };
     
-    tor_main(13, argv);
+    @try {
+        tor_main(13, argv);
+    } @catch (NSException *exception) {
+        [self reload];
+    } @finally {
+        
+    }
 }
 
 - (void)reload

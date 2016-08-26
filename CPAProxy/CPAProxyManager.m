@@ -232,6 +232,7 @@ typedef NS_ENUM(NSUInteger, CPAControlPortStatus) {
 {
     self.controlPortStatus = CPAControlPortStatusClosed;
     // Do not try reconnecting. We restart the whole thing anyways
+    [self failWithError:error];
 }
 
 #pragma mark - Handle Tor control responses
