@@ -35,7 +35,11 @@ pushd "openssl-${OPENSSL_VERSION}"
 		fi
 	fi
 
-	export CC="${CLANG} -arch ${ARCH} -fPIE -miphoneos-version-min=${MIN_IOS_VERSION}"
+   	if [ "${PLATFORM}" == "macosx" ]; then
+		export CC="${CLANG} -arch ${ARCH} -fPIE" #-miphoneos-version-min=${MIN_IOS_VERSION}"
+   	else
+		export CC="${CLANG} -arch ${ARCH} -fPIE -miphoneos-version-min=${MIN_IOS_VERSION}"
+   	fi
 	export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
 	export CROSS_SDK="${PLATFORM}${SDK}.sdk"
 

@@ -4,7 +4,7 @@ set -e
 ARCHIVE_NAME="libevent-${LIBEVENT_VERSION}"
 
 if [ ! -e "${ARCHIVE_NAME}.tar.gz" ]; then
-	curl -LO "https://github.com/libevent/libevent/releases/download/release-${LIBEVENT_VERSION}/${ARCHIVE_NAME}.tar.gz"  --retry 5
+   curl -LO "https://github.com/libevent/libevent/releases/download/release-${LIBEVENT_VERSION}/${ARCHIVE_NAME}.tar.gz"  --retry 5
 fi
 
 # Extract source
@@ -14,16 +14,22 @@ tar zxf "${ARCHIVE_NAME}.tar.gz"
 pushd "${ARCHIVE_NAME}"
 
    CC="${CLANG}"
-   LDFLAGS="-L${ARCH_BUILT_DIR} -fPIE -miphoneos-version-min=${MIN_IOS_VERSION}"
-   CFLAGS=" -arch ${ARCH} -fPIE -isysroot ${SDK_PATH} -I${ARCH_BUILT_HEADERS_DIR} -miphoneos-version-min=${MIN_IOS_VERSION}"
-   CPPFLAGS=" -arch ${ARCH} -fPIE -isysroot ${SDK_PATH} -I${ARCH_BUILT_HEADERS_DIR} -miphoneos-version-min=${MIN_IOS_VERSION}"
+   if [ "${PLATFORM}" == "macosx" ]; then
+      LDFLAGS="-L${ARCH_BUILT_DIR} -fPIE" # -miphoneos-version-min=${MIN_IOS_VERSION}"
+      CFLAGS=" -arch ${ARCH} -fPIE -isysroot ${SDK_PATH} -I${ARCH_BUILT_HEADERS_DIR}" # -miphoneos-version-min=${MIN_IOS_VERSION}"
+      CPPFLAGS=" -arch ${ARCH} -fPIE -isysroot ${SDK_PATH} -I${ARCH_BUILT_HEADERS_DIR}" # -miphoneos-version-min=${MIN_IOS_VERSION}"
+   else
+      LDFLAGS="-L${ARCH_BUILT_DIR} -fPIE -miphoneos-version-min=${MIN_IOS_VERSION}"
+      CFLAGS=" -arch ${ARCH} -fPIE -isysroot ${SDK_PATH} -I${ARCH_BUILT_HEADERS_DIR} -miphoneos-version-min=${MIN_IOS_VERSION}"
+      CPPFLAGS=" -arch ${ARCH} -fPIE -isysroot ${SDK_PATH} -I${ARCH_BUILT_HEADERS_DIR} -miphoneos-version-min=${MIN_IOS_VERSION}"
+   fi
 
    if [ "${ARCH}" == "i386" ] || [ "${ARCH}" == "x86_64" ];
-   	then
-		EXTRA_CONFIG=""
-	else
-		EXTRA_CONFIG="--host=arm-apple-darwin"
-	fi
+      then
+      EXTRA_CONFIG=""
+   else
+      EXTRA_CONFIG="--host=arm-apple-darwin"
+   fi
 
    ./configure --disable-shared --enable-static --disable-debug-mode ${EXTRA_CONFIG} \
    --prefix="${ROOTDIR}" \

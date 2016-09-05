@@ -5,19 +5,32 @@
 # ARCHS : i386 x86_64 armv7 arm64
 # LIBRARIES: openssl libevent tor
 # USE_BUILD_LOG: true false
+# PLATFORM: macosx iphoneos iphonesimulator
 
 set -e
 
-SDK=$1
+PLATFORM=$1
+
+if [ "${PLATFORM}" == "" ]; then
+  PLATFORM="iphoneos" 
+fi
+
+if [ "${PLATFORM}" == "iphoneos" ]; then
+  COL_NUM_FOR_SDK="-f2" 
+else
+  COL_NUM_FOR_SDK="-f3" 
+fi
+
+
 if [ "${SDK}" == "" ]
 then
-  AVAIL_SDKS=`xcodebuild -showsdks | grep "iphoneos"`
+  AVAIL_SDKS=`xcodebuild -showsdks | grep ${PLATFORM}`
   FIRST_SDK=`echo "$AVAIL_SDKS" | head -n1`
   if [ "$AVAIL_SDKS" == "$FIRST_SDK" ]; then
-    SDK=`echo "$FIRST_SDK" | cut -d\  -f2`
-    echo "No iOS SDK specified. Using the only one available: $SDK"
+    SDK=`echo "$FIRST_SDK" | cut -d\  ${COL_NUM_FOR_SDK}`
+    echo "No SDK specified. Using the only one available: $SDK"
   else
-    echo "Please specify an iOS SDK version number from the following possibilities:"
+    echo "Please specify an SDK version number from the following possibilities:"
     echo "$AVAIL_SDKS"
     exit 1
   fi
@@ -26,7 +39,11 @@ fi
 if [ -n "${ARCHS}" ]; then
   echo "Building user-defined architectures: ${ARCHS}"
 else
-  ARCHS="i386 x86_64 armv7 arm64"
+  if [ "${PLATFORM}" == "macosx" ]; then
+    ARCHS="i386 x86_64"
+  else
+    ARCHS="i386 x86_64 armv7 arm64"
+  fi
   echo "Building architectures: ${ARCHS}"
 fi
 
@@ -73,13 +90,18 @@ for ARCH in ${ARCHS}
 do
   for LIBRARY in ${LIBRARIES}
   do
-    if [ "${ARCH}" == "i386" ] || [ "${ARCH}" == "x86_64" ]; then
-        PLATFORM="iPhoneSimulator"
-        PLATFORM_SDK="iphonesimulator${SDK}"
+    if [ "${PLATFORM}" == "macosx" ]; then
+      PLATFORM_SDK="macosx${SDK}"
     else
-        PLATFORM="iPhoneOS"
-        PLATFORM_SDK="iphoneos${SDK}"
+      if [ "${ARCH}" == "i386" ] || [ "${ARCH}" == "x86_64" ]; then
+          PLATFORM="iPhoneSimulator"
+          PLATFORM_SDK="iphonesimulator${SDK}"
+      else
+          PLATFORM="iPhoneOS"
+          PLATFORM_SDK="iphoneos${SDK}"
+      fi
     fi
+
     ROOTDIR="${BUILD_DIR}/${PLATFORM}-${SDK}-${ARCH}"
     rm -rf "${ROOTDIR}"
     mkdir -p "${ROOTDIR}"
