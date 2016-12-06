@@ -15,7 +15,7 @@ pushd "tor-${TOR_VERSION}"
 	# Apply patches
 	patch -p3 < "${TOPDIR}/patches/tor-nsenviron.diff"
 	patch -p3 < "${TOPDIR}/patches/tor-ptrace.diff"
-	patch -p0 < "${TOPDIR}/patches/tor-configure.diff"
+	patch -p0 < "${TOPDIR}/patches/tor-configure.diff"  configure
 	patch -p1 < "${TOPDIR}/patches/tor-nosigpipe.diff"
 	patch -p1 < "${TOPDIR}/patches/tor-reload.diff"
  	patch -p3 < "${TOPDIR}/patches/tor-rephist.diff"
