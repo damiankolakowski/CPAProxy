@@ -1,0 +1,10 @@
+--- configure.orig	2016-12-08 12:32:22.000000000 +0100
++++ configure.ac	2016-12-08 12:27:58.000000000 +0100
+@@ -401,7 +401,6 @@
+         flock \
+         ftime \
+         getaddrinfo \
+-        getentropy \
+         getifaddrs \
+         getpass \
+         getrlimit \
