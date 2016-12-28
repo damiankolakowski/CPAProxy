@@ -35,7 +35,7 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   CPAProxy:
-    :path: "./CPAProxy.podspec"
+    :path: ./CPAProxy.podspec
   ProxyKit:
     :commit: 0e0a2c7bc11d39803a6d6292e107704e6131635d
     :git: https://github.com/chrisballinger/ProxyKit.git
@@ -48,7 +48,9 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   CocoaAsyncSocket: a18c75dca4b08723628a0bacca6e94803d90be91
   CocoaLumberjack: 17fe8581f84914d5d7e6360f7c70022b173c3ae0
-  CPAProxy: cfd27b25328d6517b1f8570c4f0045838353e888
+  CPAProxy: 3a23720ca12c0725353a6cd45673fae2b460a98a
   ProxyKit: 1f35adc913debc7ca6748c02487361dabaaea532
 
-COCOAPODS: 0.39.0
+PODFILE CHECKSUM: 1f7ce3b443cc4467bfb7e8b37a96c22505928b94
+
+COCOAPODS: 1.1.1
