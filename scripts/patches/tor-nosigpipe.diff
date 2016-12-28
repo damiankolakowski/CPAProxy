@@ -78,19 +78,3 @@ index 04f48a4..07a07fb 100644
      else
        result = write((int)fd, buf+written, count-written);
      if (result<0)
-diff --git a/src/ext/eventdns.c b/src/ext/eventdns.c
-index 37d8a7a..f37b52b 100644
---- a/src/ext/eventdns.c
-+++ b/src/ext/eventdns.c
-@@ -2025,7 +2025,7 @@ evdns_request_timeout_callback(int fd, short events, void *arg) {
- static int
- evdns_request_transmit_to(struct evdns_request *req, struct nameserver *server) {
- 	const ssize_t r = send(server->socket, (void*)req->request,
--                         req->request_len, 0);
-+                         req->request_len, SO_NOSIGPIPE);
- 	if (r < 0) {
- 		int err = last_error(server->socket);
- 		if (error_is_eagain(err)) return 1;
--- 
-2.7.1
-

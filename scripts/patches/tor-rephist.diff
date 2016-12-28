@@ -1,13 +1,12 @@
---- build/src/tor-0.2.5.8-rc/src/or/rephist.c
-+++ build/src/tor-0.2.5.8-rc/src/or/rephist.c
-@@ -3213,7 +3213,7 @@ rep_hist_free_all(void)
+--- a/src/or/rephist.c
++++ b/src/or/rephist.c
+@@ -3289,7 +3289,7 @@ rep_hist_free_all(void)
    rep_hist_desc_stats_term();
    total_descriptor_downloads = 0;
  
--  tor_assert(rephist_total_alloc == 0);
--  tor_assert(rephist_total_num == 0);
-+  // tor_assert(rephist_total_alloc == 0);
-+  // tor_assert(rephist_total_num == 0);
+-  tor_assert_nonfatal(rephist_total_alloc == 0);
+-  tor_assert_nonfatal_once(rephist_total_num == 0);
++  // tor_assert_nonfatal(rephist_total_alloc == 0);
++  // tor_assert_nonfatal_once(rephist_total_num == 0);
  }
  
-
