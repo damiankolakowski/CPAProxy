@@ -279,7 +279,9 @@ typedef NS_ENUM(NSUInteger, CPAControlPortStatus) {
         __weak typeof(self)weakSelf = self;
         dispatch_async(self.callbackQueue, ^{
             __strong typeof(weakSelf)strongSelf = weakSelf;
-            strongSelf.progressBlock(progress,summaryString);
+            if (strongSelf.progressBlock) {
+                strongSelf.progressBlock(progress,summaryString);
+            }
         });
     }
 
