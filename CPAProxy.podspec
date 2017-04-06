@@ -8,12 +8,14 @@ Pod::Spec.new do |s|
   s.license         = { :type => 'MIT', :file => 'LICENSE.md' }
   s.source          = { :git => "https://github.com/chrisballinger/CPAProxy.git", :branch => "podspec"}
   s.prepare_command = <<-CMD
-    bash ./scripts/build-all.sh
+    bash ./scripts/build-all-osx.sh
   CMD
 
   s.dependency 'CocoaAsyncSocket'
 
-  s.platform     = :ios, "7.0"
+  #s.ios.deployment_target = '7.0'
+  s.osx.deployment_target = '10.12'
+
   s.source_files = "CPAProxy/*.{h,m}", "CPAProxyDependencies/tor_cpaproxy.h"
   s.private_header_files = 'CPAProxyDependencies/tor_cpaproxy.h'
   s.vendored_libraries  = "CPAProxyDependencies/*.a"

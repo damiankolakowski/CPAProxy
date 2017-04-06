@@ -20,3 +20,7 @@ CPAProxyDependencies/
 Pods/
 scripts/build/
 scripts/built/
+scripts/tor-0.2.9.8
+scripts/openssl-1.0.2h
+scripts/libevent-2.0.22-stable
+scripts/output
