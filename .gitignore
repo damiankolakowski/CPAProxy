@@ -16,7 +16,6 @@ profile
 *.moved-aside
 *.xccheckout
 
-CPAProxyDependencies/
 Pods/
 scripts/build/
 scripts/built/
