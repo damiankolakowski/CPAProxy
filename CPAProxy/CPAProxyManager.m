@@ -296,7 +296,9 @@ typedef NS_ENUM(NSUInteger, CPAControlPortStatus) {
             __weak typeof(self)weakSelf = self;
             dispatch_async(self.callbackQueue, ^{
                 __strong typeof(weakSelf)strongSelf = weakSelf;
-                strongSelf.completionBlock(socksHost, socksPort, nil);
+                if (strongSelf.completionBlock) {
+                    strongSelf.completionBlock(socksHost, socksPort, nil);
+                }
                 strongSelf.completionBlock = nil;
                 strongSelf.progressBlock = nil;
             });
@@ -337,7 +339,9 @@ typedef NS_ENUM(NSUInteger, CPAControlPortStatus) {
         __weak typeof(self)weakSelf = self;
         dispatch_async(self.callbackQueue, ^{
             __strong typeof(weakSelf)strongSelf = weakSelf;
-            strongSelf.completionBlock(nil,0,error);
+            if (strongSelf.completionBlock) {
+                strongSelf.completionBlock(nil, 0, error);
+            }
             strongSelf.completionBlock = nil;
             strongSelf.progressBlock = nil;
         });
