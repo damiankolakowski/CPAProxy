@@ -20,6 +20,13 @@ typedef NS_ENUM(NSUInteger, CPAStatus) {
     CPAStatusOpen
 };
 
+typedef NS_ENUM(NSUInteger, CPAErrors) {
+    CPAErrorTorrcOrGeoipPathNotSet = 0,
+    CPAErrorTorAuthenticationFailed,
+    CPAErrorSocketOpenFailed,
+    CPAErrorTorSetupTimedOut,
+};
+
 /**
  `CPAProxyManager` is a class responsible for coordinating the creation and communication with a Tor client running in a separate thread represented by `CPAThread`. After the Tor client has been started using the `CPAThread` instance, the `CPAProxyManager` uses `CPASocketManager` to send control messages until it has successfully bootstrapped Tor.
  
@@ -89,9 +96,6 @@ typedef NS_ENUM(NSUInteger, CPAStatus) {
  */
 - (void)setupWithCompletion:(CPABootstrapCompletionBlock)completion
                    progress:(CPABootstrapProgressBlock)progress;
-
-- (void)reloadWithCompletion:(CPABootstrapCompletionBlock)completion
-                    progress:(CPABootstrapProgressBlock)progress;
 
 /**
  Starts running the `CPAThread` wrapping a Tor client, sends authentication and `get bootstrap info` messages to the control port and runs the success block with the SOCKS proxy's host and port on success. If anything goes wrong, the failure block is called with an NSError with `CPAErrorDomain`.
