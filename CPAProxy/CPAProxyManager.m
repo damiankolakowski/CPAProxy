@@ -19,7 +19,7 @@ NSString * const CPAProxyDidFinishSetupNotification = @"com.cpaproxy.setup.finis
 
 NSString * const CPAErrorDomain = @"CPAErrorDomain";
 
-static const NSTimeInterval CPAConnectToTorSocketDelay = 0.2; //Amount of time to wait before attempting to connect again
+static const NSTimeInterval CPAConnectToTorSocketDelay = 0.5; //Amount of time to wait before attempting to connect again
 static const NSTimeInterval CPATimeoutDelay = 60; // Sometimes Tor takes a long time to bootstrap
 static const NSUInteger CPAMaxNumberControlConnectionAttempts = 10; //Max number of retries before firing an error
 
@@ -111,6 +111,7 @@ typedef NS_ENUM(NSUInteger, CPAControlPortStatus) {
                    progress:(CPABootstrapProgressBlock)progress
               callbackQueue:(dispatch_queue_t)callbackQueue
 {
+    self.controlPortConnectionAttempts = 0;
     self.controlPortStatus = CPAControlPortStatusConnecting;
     self.status = CPAStatusConnecting;
     
@@ -132,7 +133,6 @@ typedef NS_ENUM(NSUInteger, CPAControlPortStatus) {
     
     // Only start the tor thread if it's not already executing
     if (self.torThread.isExecuting) {
-        [self.socketManager disconnect];        
         [self.torThread reload];
     } else {
         [self.torThread start];
@@ -178,6 +178,10 @@ typedef NS_ENUM(NSUInteger, CPAControlPortStatus) {
                                                            userInfo:nil
                                                             repeats:NO];
     });
+}
+
+- (void)disconnectTor {
+    [self.socketManager disconnect];
 }
 
 #pragma mark - CPASocketManagerDelegate methods
@@ -313,7 +317,9 @@ typedef NS_ENUM(NSUInteger, CPAControlPortStatus) {
 }
 
 - (BOOL) isConnected {
-    return self.status == CPAStatusOpen;
+    return self.status == CPAStatusOpen &&
+    self.socketManager.isConnected &&
+    self.socketManager.socket.isConnected;
 }
 
 - (void)postNotificationWithName:(NSString * const)notificationName
