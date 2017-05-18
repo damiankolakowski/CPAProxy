@@ -5,6 +5,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "GCDAsyncSocket.h"
+
 
 @class CPAProxyCommand;
 
@@ -14,6 +16,8 @@
  A `CPASocketManager` is responsible for reading and writing data to a socket that is usually connected to a Tor client's control port.
  */
 @interface CPASocketManager : NSObject
+
+@property (nonatomic, strong, readonly) GCDAsyncSocket *socket;
 
 /**
  Returns YES if the socket manager has a connected socket, NO otherwise.

@@ -109,6 +109,11 @@ typedef NS_ENUM(NSUInteger, CPAErrors) {
               callbackQueue:(dispatch_queue_t)callbackQueue;
 
 /**
+ disconnects the control port
+ */
+- (void)disconnectTor;
+
+/**
  @return Current version string for OpenSSL https://www.openssl.org
  */
 + (NSString*) opensslVersion;
